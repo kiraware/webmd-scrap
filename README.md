@@ -61,11 +61,9 @@ uv sync
 ```bash
 # macOS / Linux
 source .venv/bin/activate
-python main.py
 
 # Windows (PowerShell)
 .venv\Scripts\Activate.ps1
-python main.py
 ```
 
 ---
@@ -73,7 +71,7 @@ python main.py
 ## Run the scraper
 
 ```bash
-uv run python main.py
+python main.py
 ```
 
 ---
