@@ -84,5 +84,3 @@ After the run completes, the script saves:
 
 - `drugs_list.csv` — CSV with columns: `Alphabet, Drug Name, Link`.
 - `drugs_list.ndjson` — JSON grouped by alphabet.
-
-Files are written to the project root (same folder as `main.py`) unless changed in the script.
