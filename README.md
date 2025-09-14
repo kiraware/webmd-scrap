@@ -19,7 +19,7 @@ The scraper uses Selenium (Firefox / geckodriver) + BeautifulSoup and `webdriver
 1. Install `uv` (Astral) — the dependency manager.
 2. Initialize or use a project with `uv`.
 3. Install dependencies: `selenium`, `beautifulsoup4`, `lxml`, `webdriver-manager`.
-4. Run the scraper script (`main.py`) using `uv run` or by activating the environment.
+4. Run the scraper script (`main.py`) using `uv run`.
 5. Outputs are written to `drugs_list.csv` and `drugs_list.json` in the project root.
 
 ---
