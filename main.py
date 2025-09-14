@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-# streaming_scraper.py
 import csv
 import json
 import os
