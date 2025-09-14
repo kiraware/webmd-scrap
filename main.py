@@ -1,27 +1,29 @@
 #!/usr/bin/env python3
 # streaming_scraper.py
-import time
 import csv
 import json
 import os
 import string
+import time
 from pathlib import Path
+
 from selenium import webdriver
-from selenium.webdriver.firefox.service import Service
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException, WebDriverException
+from selenium.webdriver.common.by import By
+from selenium.webdriver.firefox.service import Service
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
 from webdriver_manager.firefox import GeckoDriverManager
 
 # ---------- Config ----------
 BASE_URL = "https://www.webmd.com/drugs/2/alpha/"
 CSV_PATH = "drugs_list.csv"
-NDJSON_PATH = "drugs_list.ndjson"   # streaming-friendly JSON lines
+NDJSON_PATH = "drugs_list.ndjson"  # streaming-friendly JSON lines
 WAIT_SECONDS = 2
 PAUSE_AFTER_LOAD = 0.5
 HEADLESS = True
 # ----------------------------
+
 
 def make_driver(headless=True):
     options = webdriver.FirefoxOptions()
@@ -33,6 +35,7 @@ def make_driver(headless=True):
     driver = webdriver.Firefox(service=service, options=options)
     return driver
 
+
 def normalize_link(href: str) -> str:
     if not href:
         return ""
@@ -41,6 +44,7 @@ def normalize_link(href: str) -> str:
     if href.startswith("/"):
         return "https://www.webmd.com" + href
     return "https://www.webmd.com/" + href.lstrip("/")
+
 
 def open_output_files(csv_path, ndjson_path):
     # Open CSV in append mode and write header if file is new
@@ -55,6 +59,7 @@ def open_output_files(csv_path, ndjson_path):
     ndjson_f = open(ndjson_path, "a", encoding="utf-8")
     return csv_f, csv_writer, ndjson_f
 
+
 def flush_files(*files):
     for f in files:
         try:
@@ -66,6 +71,7 @@ def flush_files(*files):
                 f.flush()
             except Exception:
                 pass
+
 
 def stream_scrape(driver):
     seen_global = set()
@@ -86,7 +92,9 @@ def stream_scrape(driver):
                 time.sleep(PAUSE_AFTER_LOAD)
                 try:
                     WebDriverWait(driver, WAIT_SECONDS).until(
-                        EC.presence_of_element_located((By.CSS_SELECTOR, "a.alpha-drug-name"))
+                        EC.presence_of_element_located(
+                            (By.CSS_SELECTOR, "a.alpha-drug-name")
+                        )
                     )
                 except TimeoutException:
                     # no items on this page
@@ -111,7 +119,13 @@ def stream_scrape(driver):
                     # write CSV immediately
                     csv_writer.writerow([first, name, href])
                     # write NDJSON immediately
-                    ndjson_f.write(json.dumps({"alpha": first, "name": name, "link": href}, ensure_ascii=False) + "\n")
+                    ndjson_f.write(
+                        json.dumps(
+                            {"alpha": first, "name": name, "link": href},
+                            ensure_ascii=False,
+                        )
+                        + "\n"
+                    )
 
                     # flush both files so external readers see updates instantly
                     flush_files(csv_f, ndjson_f)
@@ -130,7 +144,9 @@ def stream_scrape(driver):
             time.sleep(PAUSE_AFTER_LOAD)
             try:
                 WebDriverWait(driver, WAIT_SECONDS).until(
-                    EC.presence_of_element_located((By.CSS_SELECTOR, "a.alpha-drug-name"))
+                    EC.presence_of_element_located(
+                        (By.CSS_SELECTOR, "a.alpha-drug-name")
+                    )
                 )
             except TimeoutException:
                 pass
@@ -146,7 +162,12 @@ def stream_scrape(driver):
                     continue
                 seen_global.add(key)
                 csv_writer.writerow(["0", name, href])
-                ndjson_f.write(json.dumps({"alpha": "0", "name": name, "link": href}, ensure_ascii=False) + "\n")
+                ndjson_f.write(
+                    json.dumps(
+                        {"alpha": "0", "name": name, "link": href}, ensure_ascii=False
+                    )
+                    + "\n"
+                )
                 flush_files(csv_f, ndjson_f)
                 print(f"   + [0] {name}", flush=True)
                 added += 1
@@ -159,6 +180,7 @@ def stream_scrape(driver):
         csv_f.close()
         ndjson_f.close()
 
+
 def main():
     driver = make_driver(headless=HEADLESS)
     try:
@@ -166,6 +188,7 @@ def main():
         print("\nDone. Outputs:", CSV_PATH, NDJSON_PATH, flush=True)
     finally:
         driver.quit()
+
 
 if __name__ == "__main__":
     main()
